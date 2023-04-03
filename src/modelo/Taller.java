@@ -1,17 +1,35 @@
+package modelo;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
+
+import dao.TallerDAO;
 
 public class Taller implements TallerInterface {
 	
 	private int contadorTrabajos;
 	private ArrayList<Trabajo> trabajos;
+	private TallerDAO tallerDAO;
 
 	public Taller(ArrayList<Trabajo> trabajos, int contadorTrabajos) {
 		this.trabajos = new ArrayList<>();
+		
 	}
 
 	public Taller() {
 		this.trabajos = new ArrayList<>();
+		this.tallerDAO = new TallerDAO();
+		this.contadorTrabajos = retornarID();
 	}
+	
+	public TallerDAO getTallerDAO() {
+		return tallerDAO;
+	}
+
+	public void setTallerDAO(TallerDAO tallerDAO) {
+		this.tallerDAO = tallerDAO;
+	}
+
 	public int getContadorTrabajos() {
 		return contadorTrabajos;
 	}
@@ -24,17 +42,30 @@ public class Taller implements TallerInterface {
 		this.trabajos = trabajos;
 	}
 	
+	public int retornarID() {
+		try {
+			contadorTrabajos = tallerDAO.obtenerProximoId();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return contadorTrabajos;
+	}
+	
 	 @Override
 	    public int anadirTrabajo(String tipoTrabajo, String descripcion, String nombreIngeniero, String nombreMaquina) {
 	        
 	        Trabajo trabajo = null;
 	        if(tipoTrabajo.equalsIgnoreCase("electronica") || tipoTrabajo.equalsIgnoreCase("el")) {
+	        	
 	        	trabajo = new Electronica(contadorTrabajos, descripcion, nombreIngeniero, nombreMaquina);
 	        } else {
 	            return -1;
 	        }
 	        trabajos.add(trabajo);
-	        return contadorTrabajos++;
+	        tallerDAO.aniadirTrabajo(tipoTrabajo, descripcion, nombreIngeniero, nombreMaquina);
+			return contadorTrabajos++;
+	       
 	    }
 
 	 @Override
@@ -53,6 +84,7 @@ public class Taller implements TallerInterface {
 	            return -1;
 	        }
 	        trabajos.add(trabajo);
+	        tallerDAO.aniadirTrabajoM(tipoTrabajo, descripcion);
 	        return contadorTrabajos++;
 	    }
 	 
@@ -68,18 +100,22 @@ public class Taller implements TallerInterface {
 	 
 	 public int borrarTrabajo(int id) {
 		 
-		 Trabajo trabajo = buscarTrabajo(id);
+		 Trabajo trabajo = tallerDAO.buscarTrabajoPorId(id);
 		 
+		 try {
 		 if(trabajo == null) {
 			 return -1;
 		 }
 		 
-		 trabajos.remove(id);
+			tallerDAO.borrarTrabajo(id);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		 return 0;
 	 }
 	 
 	 public int aumentarHoras(int id, int horas) {
-		    Trabajo trabajo = buscarTrabajo(id); // buscar trabajo por su id
+		    Trabajo trabajo = tallerDAO.buscarTrabajoPorId(id); // buscar trabajo por su id
 		    
 		    if (trabajo == null) {
 		        return -1; 
@@ -90,13 +126,13 @@ public class Taller implements TallerInterface {
 		    if(horas < 0) {
 		    	return 0;
 		    }
-		    trabajo.aumentarHoras(horas);
+		    tallerDAO.aumentarHoras(id, horas);
 		    return 1;
 		}
 
 	@Override
 	public int aumentarCostePiezas(int id, double precio) {
-		Trabajo trabajo = buscarTrabajo(id);
+		Trabajo trabajo = tallerDAO.buscarTrabajoPorId(id);
 		
 		if(trabajo == null) {
 			return -3;
@@ -109,7 +145,7 @@ public class Taller implements TallerInterface {
 		if(trabajo instanceof Reparacion) {
 			Reparacion reparacion = (Reparacion) trabajo;
 			if(!reparacion.isFinalizado()) {
-				reparacion.aumentarCostePiezas(precio);
+				tallerDAO.aumentarCostePiezas(id, precio);
 				return 1;
 			}
 		}else {	
@@ -120,7 +156,8 @@ public class Taller implements TallerInterface {
 
 	@Override
 	public int finalizarTrabajo(int id) {
-		Trabajo trabajo = buscarTrabajo(id);
+		Trabajo trabajo = tallerDAO.buscarTrabajoPorId(id);
+		try {
 		
 		if(trabajo == null) {
 			return -1;
@@ -128,6 +165,11 @@ public class Taller implements TallerInterface {
 			return 0;
 		}if(!trabajo.isFinalizado()) {
 			trabajo.setFinalizado(true);
+				tallerDAO.finalizarTrabajo(id);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return 1;
 	}
@@ -135,10 +177,11 @@ public class Taller implements TallerInterface {
 	@Override
 	public String muestraTrabajo(int id) {
 		String resultado = "";
-		Trabajo trabajo = buscarTrabajo(id);
-		if(trabajo != null)
+		Trabajo trabajillo = tallerDAO.buscarTrabajoPorId(id);
+		
+		if(trabajillo != null)
 		{
-			resultado = trabajo.toString();
+			resultado = trabajillo.toString();
 		}else {
 			resultado += "Trabajo Inexistente";
 		}

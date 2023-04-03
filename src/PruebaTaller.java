@@ -1,5 +1,7 @@
 import java.util.Scanner;
 
+import modelo.Taller;
+
 public class PruebaTaller {	
 	
 	
@@ -107,7 +109,7 @@ public class PruebaTaller {
 				if(idError == -1) {
 					System.out.println("\nERROR, Trabajo Inexistente!");
 				}else if(idError == 0) {
-					System.out.println("\nTrabajado Borrado con EXITO!");
+					System.out.println("\nTrabajo Borrado con EXITO!");
 				}
 				break;
 			}

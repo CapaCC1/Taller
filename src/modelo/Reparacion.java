@@ -1,3 +1,4 @@
+package modelo;
 
 public abstract class Reparacion extends Trabajo {
 			

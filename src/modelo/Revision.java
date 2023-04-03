@@ -1,16 +1,24 @@
+package modelo;
+
+import java.sql.SQLException;
+
+import dao.TrabajoDAO;
 
 public class Revision extends Trabajo {
 	
 	private boolean necesitaMantenimiento;
+	private TrabajoDAO trabajoDAO;
 	
 	public Revision(int id, String descripcion) {
 		super(id, descripcion);
 		this.necesitaMantenimiento = false;
+		this.trabajoDAO = new TrabajoDAO();
 	}
 	
 	public Revision(String descripcion) {
 		super(descripcion);
 		this.necesitaMantenimiento = false;
+		this.trabajoDAO = new TrabajoDAO();
 	}
 	
 	public boolean isNecesitaMantenimiento() {
@@ -20,12 +28,20 @@ public class Revision extends Trabajo {
 	public void setNecesitaMantenimiento(boolean necesitaMantenimiento) {
 		this.necesitaMantenimiento = necesitaMantenimiento;
 	}
-
+	
 	public double calcularPrecio() {
-        double precio = super.getHoras() * 30 + 20; 
+		int id = this.getId();
+		double precio = 0;
+        try {
+        	precio = trabajoDAO.obtenerHorasTrabajo(id) * 30 + 20; 
+        	trabajoDAO.actualizarPrecioTrabajo(id,precio);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return precio;
     }
-
+	
 	@Override
 	public String toString() {
 		String info = super.toString();

@@ -1,3 +1,4 @@
+package modelo;
 
 public abstract class Trabajo {
 	
@@ -63,6 +64,7 @@ public abstract class Trabajo {
 	    }
 	    return false;
 	}
+	
 	
 	@Override
 	public String toString() {

@@ -1,3 +1,8 @@
+package modelo;
+
+import java.sql.SQLException;
+
+import dao.TrabajoDAO;
 
 public class Electronica extends Reparacion{
 	
@@ -6,16 +11,42 @@ public class Electronica extends Reparacion{
 	private String nombreMaquina;
 	static final int COSTE_MAQUINA = 30;
 	static final int COSTE_INGENIERO = 70;
+	private TrabajoDAO trabajoDAO;
 	
 	public Electronica(int id, String descripcion, String nombreIngeniero, String nombreMaquina) {
 		super(id, descripcion);
 		this.nombreIngeniero = nombreIngeniero;
 		this.nombreMaquina = nombreMaquina;
+		this.trabajoDAO = new TrabajoDAO();
 	}
 	
-	public Electronica(int id, String descripcion) {
-		super(id, descripcion);
+	public Electronica(String descripcion, String nombreIngeniero, String nombreMaquina) {
+		super(descripcion);
+		this.nombreIngeniero = nombreIngeniero;
+		this.nombreMaquina = nombreMaquina;
+		this.trabajoDAO = new TrabajoDAO();
 		
+	}
+	
+	public Electronica(String descripcion) {
+		super(descripcion);
+		this.trabajoDAO = new TrabajoDAO();
+	}
+
+	public Electronica(int id,String descripcion) {
+		super(id,descripcion);
+		this.trabajoDAO = new TrabajoDAO();
+		
+	}
+	
+	
+	
+	public TrabajoDAO getTrabajoDAO() {
+		return trabajoDAO;
+	}
+
+	public void setTrabajoDAO(TrabajoDAO trabajoDAO) {
+		this.trabajoDAO = trabajoDAO;
 	}
 
 	public String getNombreIngeniero() {
@@ -43,7 +74,15 @@ public class Electronica extends Reparacion{
 	}
 	
 	public double calcularPrecio() {
-        double precio = super.getPrecioPiezas() + COSTE_MAQUINA + COSTE_INGENIERO; 
+		int id = this.getId();
+		double precio = 0;
+        try {
+        	precio = trabajoDAO.obtenerPrecioPiezas(id) + COSTE_MAQUINA + COSTE_INGENIERO; 
+        	trabajoDAO.actualizarPrecioTrabajo(id,precio);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return precio;
     }
 	
